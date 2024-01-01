@@ -1,2 +1,1143 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+##################################################
+# File       : CreateCards
+# Date       : December 04, 2023
+# Created By : Furkan VEZNEDAR
+# Purpose    : Easly Implement Cards to Model
+##################################################
+
+set Standard_State 2
+set Method_State 2
+set Type_State 2
+
+proc ::selectStandard {w} {
+	global Standard_State
+	
+	foreach child [winfo children $w] {
+		
+		if {$child == "$w.b"} continue
+		if {$::activated1} {
+			set Standard_State 1
+			$child configure -state normal
+		} else {
+			set Standard_State 2
+			$child configure -state normal
+		}
+		puts $child
+	}
+}
+
+proc ::selectMethod {w} {
+	global Method_State
+	
+	foreach child [winfo children $w] {
+		
+		if {$child == "$w.b"} continue
+		if {$::activated2} {
+			set Method_State 1
+			$child configure -state normal
+		} else {
+			set Method_State 2
+			$child configure -state normal
+		}
+		puts $child
+	}
+}
+
+proc ::selectType {w} {
+	global Type_State
+	global standard
+	
+	if {$standard == "MIL-STD-810H"} {
+		set Method_State 2
+		$child configure -state normal
+	} else {
+		foreach child [winfo children $w] {
+			
+			if {$child == "$w.b"} continue
+			if {$::activated3} {
+				set Type_State 1
+				$child configure -state normal
+			} else {
+				set Type_State 2
+				$child configure -state normal
+			}
+			puts $child
+		}
+	}
+}
+
+set Standard_Input {
+	"AECTP-400 EDD V1 - Tracked Vehicles Low Speed" "AECTP-400 EDD V1 - Tracked Vehicles High Speed" "AECTP-400 EDD V1 - Wheeled Vehicles" "MIL-STD-810H"
+}
+
+set AECTP_Methods {
+	"Material Transported as Secured Cargo in Tracked Vehicles" "Material Installed in the Turret of Tracked Vehicles" "Material Installed in the Hull of Heavy Tracked Vehicles" "Material Installed in the Hull of Light Tracked Vehicles"
+}
+
+set AECTP_Wheeled {
+	"Material Transported in Wheeled Vehicles" "Composite Wheeled Vehicles" "Two Wheeled Trailers" "Two Wheeled Trailers - Combined Test Applicable to All Axes"
+}
+
+set MIL_Methods {
+	"Procedure I - Functional Shock"
+}
+
+set PSD_Types {
+	"Broadband Random" "Harmonic Swept Narrowbands"
+}
+
+set PSD_Types_Wheeled {
+	"Broadband Random 5 to 500Hz"
+}
+
+set PSD_Directions {
+	"Vertical" "Lateral & Longitudial"
+}
+
+set PSD_Directions_Wheeled {
+	"Vertical" "Lateral" "Longitudial"
+}
+
+set PSD_Directions_Wheeled_All {
+	"All Axes"
+}
+
+set ::HM_Framework::Settings::Keys::p_normal_key_proc(c) {ModelCreater};
+toplevel .offset_surfs
+set main .offset_surfs
+
+wm title $main "Vibration Card Wizard"
+wm geometry $main 350x410+10+10
+
+KeepOnTop $main;
+
+set page1 [frame $main.page1]
+place $page1 -in $main -relx 0 -rely 0 -relwidth 1 -relheight 1
+
+frame $page1.f1
+pack configure $page1.f1 -padx 5 -pady 5 -anchor s
+pack [hwtk::button $page1.f1.b1 -text "Zirhli Araclar Titresim: Hazir Kartlar" -help "Created By Furkan VEZNEDAR" -width 55 -image productHWTK-24.png -compound left] -side top -fill both
+
+#Force user to select standard to continue####################################################
+
+set lf2 [hwtk::labelframe $page1.f2]
+hwtk::checkbutton $lf2.b -text "Standard" -variable activated1 \
+	-command "::selectStandard $lf2"
+$lf2 configure -labelwidget $lf2.b
+pack $lf2 -pady 2m -padx 2m
+
+hwtk::label $lf2.b1 -text "Standard Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::combobox $lf2.b2 -textvariable standard -state disabled -values $Standard_Input -width 55
+pack $lf2.b1 $lf2.b2 -side top -fill x -pady 2
+
+#Force user to select method to prepare card####################################################
+
+set lf3 [hwtk::labelframe $page1.f3]
+hwtk::checkbutton $lf3.b -text "Method" -variable activated2 \
+	-command "::selectMethod $lf3"
+$lf3 configure -labelwidget $lf3.b
+pack $lf3 -pady 2m -padx 2m
+
+hwtk::label $lf3.b3 -text "Devam Wdilecek Methodu Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::combobox $lf3.b4 -textvariable method -state disabled -postcommand "updateMethodCombobox $lf3.b4" -width 55
+pack $lf3.b3 $lf3.b4 -side top -fill x -pady 2
+
+proc updateMethodCombobox {widget} {
+	global standard
+	global AECTP_Methods
+	global MIL_Methods
+	global AECTP_Wheeled
+	
+	if {$standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed"} {
+		$widget configure -values $AECTP_Methods
+	} elseif {$standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		$widget configure -values $AECTP_Methods
+	} elseif {$standard == "AECTP-400 EDD V1 - Wheeled Vehicles"} {
+		$widget configure -values $AECTP_Wheeled
+	} elseif {$standard == "MIL-STD-810H"} {
+		$widget configure -values $MIL_Methods
+	}
+}
+
+set lf4 [hwtk::labelframe $page1.f4]
+hwtk::checkbutton $lf4.b -text "PSD Tahrik Egrisi AECTP-400" -variable activated3 \
+	-command "::selectType $lf4" -help "Eger Standard Olarak MIL-STD-810H Secildiyse Bu Alani Elleme"
+$lf4 configure -labelwidget $lf4.b
+pack $lf4 -pady 2m -padx 2m
+
+hwtk::label $lf4.b1 -text "PSD Tahrik Tipini Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::combobox $lf4.b2 -textvariable type -state disabled -width 55 -postcommand "updatePSDTypes $lf4.b2"
+pack $lf4.b1 $lf4.b2 -side top -fill x -pady 2
+
+hwtk::label $lf4.b3 -text "PSD Tahrik Yonunu Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::combobox $lf4.b4 -textvariable direction -state disabled -width 55 -postcommand "updatePSDDirections $lf4.b4"
+pack $lf4.b3 $lf4.b4 -side top -fill x -pady 2
+
+proc updatePSDTypes {widget} {
+	global standard
+	global PSD_Types
+	global PSD_Types_Wheeled
+
+	if {$standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed" || $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		$widget configure -values $PSD_Types
+	} elseif {$standard == "AECTP-400 EDD V1 - Wheeled Vehicles"} {
+		$widget configure -values $PSD_Types_Wheeled	
+	} elseif {$standard == "MIL-STD-810H"} {
+		$widget configure -values ""	
+	}
+}
+
+proc updatePSDDirections {widget} {
+	global standard
+	global PSD_Directions
+	global PSD_Directions_Wheeled
+	global PSD_Directions_Wheeled_All
+	global method
+
+	if {$standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed" || $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		$widget configure -values $PSD_Directions
+	} elseif {$standard == "AECTP-400 EDD V1 - Wheeled Vehicles" && ($method == "Composite Wheeled Vehicles" || $method == "Two Wheeled Vehicles")} {
+		$widget configure -values $PSD_Directions_Wheeled	
+	} elseif {$standard == "AECTP-400 EDD V1 - Wheeled Vehicles" && ($method == "Material Transported in Wheeled Vehicles" || $method == "Two Wheeled Trailers - Combined Test Applicable to All Axes")} {
+		$widget configure -values $PSD_Directions_Wheeled_All	
+	} elseif {$standard == "MIL-STD-810H"} {
+		$widget configure -values ""	
+	}
+}
+
+frame $page1.f5
+pack configure $page1.f5 -padx 5 -pady 5 -anchor s
+pack [hwtk::button $page1.f5.b -text "Kartalari Olustur" -width 55 -image folderView-24.png -compound left -command "createCards $page1.f5.b"] -side bottom -fill both
+
+proc setFREQ {f1 df fl} {
+	if {[hm_entityinfo exist loadcols "FREQ" -byname] == 1} {
+		*clearmark loadcols 1
+		*createmark loadcols 1 "FREQ"
+		*deletemark loadcols 1
+	}
+
+	*createentity loadcols cardimage=FREQi name="loadcol1"
+	*setvalue loadcols name="loadcol1" name=FREQ
+	*setvalue loadcols name="FREQ" STATUS=2 3267=1
+	*setvalue loadcols name="FREQ" STATUS=2 7688=$f1
+	*setvalue loadcols name="FREQ" STATUS=2 7689=$df
+	*setvalue loadcols name="FREQ" STATUS=2 7690=$fl
+}
+
+proc setTSTEP {} {
+	if {[hm_entityinfo exist loadcols "TSTEP" -byname] == 1} {
+		*clearmark loadcols 1
+		*createmark loadcols 1 "TSTEP"
+		*deletemark loadcols 1
+	}
+
+	*createentity loadcols cardimage=TSTEP name="loadcol1"
+	*setvalue loadcols name="loadcol1" name=TSTEP
+	*setvalue loadcols name="TSTEP" STATUS=1 4307=264
+	*setvalue loadcols name="TSTEP" STATUS=1 4308=0.0001
+}
+
+proc setEIGRL {fmodal} {
+	if {[hm_entityinfo exist analysisparameters "EIGRL" -byname] == 1} {
+		*clearmark analysisparameters 1
+		*createmark analysisparameters 1 "EIGRL"
+		*deletemark analysisparameters 1
+	}
+
+	*createentity analysisparameters config=301 name="loadstepinput1"
+	*setvalue analysisparameters name="loadstepinput1" real_eigen_type=EIGRL
+	*setvalue analysisparameters name="loadstepinput1" name=EIGRL
+	*setvalue analysisparameters name="EIGRL" STATUS=1 v2=$fmodal
+}
+
+proc setTLOAD {} {
+	if {[hm_entityinfo exist analysisparameters "TLOAD" -byname] == 1} {
+		*clearmark analysisparameters 1
+		*createmark analysisparameters 1 "TLOAD"
+		*deletemark analysisparameters 1
+	}
+
+	*createentity analysisparameters config=311 name="loadstepinput1"
+	*setvalue analysisparameters name="loadstepinput1" timedependant_type=EIGRL
+	*setvalue analysisparameters name="loadstepinput1" name=TLOAD
+	set spcd_id [hm_getvalue loadcols name="SPCD" dataname=id]
+	*setvalue analysisparameters name="TLOAD" STATUS=2 exciteid={loadcols $spcd_id}
+	*setvalue analysisparameters name="TLOAD" STATUS=1 dynamic_excitation_type="ACCE"
+	set tabled_id [hm_getvalue curves name="TABLED" dataname=id]
+	*setvalue analysisparameters name="TLOAD" STATUS=2 tid_tableid={curves $tabled_id}
+}
+
+proc setTABDMP {f1} {
+	if {[hm_entityinfo exist curves "TABDMP" -byname] == 1} {
+		*clearmark curves 1
+		*createmark curves 1 "TABDMP"
+		*deletemark curves 1
+	}
+
+	*createentity curves name="curve1"
+	*setvalue curves name="curve1" name=TABDMP
+	*setvalue curves name="TABDMP" STATUS=2 4014="CRIT"
+	set tabdmp_id [hm_getvalue curves name="TABDMP" dataname=id]
+	*curveaddpoint $tabdmp_id 0 5 0.025
+	*curveaddpoint $tabdmp_id 1 $f1 0.025
+}
+
+
+proc setTABLED {} {
+	global standard
+	
+	if {[hm_entityinfo exist curves "TABLED" -byname] == 1} {
+		*clearmark curves 1
+		*createmark curves 1 "TABLED"
+		*deletemark curves 1
+	}
+
+	*createentity curves name="curve1"
+	*setvalue curves name="curve1" STATUS=1 12300=1
+	*setvalue curves name="curve1" STATUS=1 12301=2
+	*setvalue curves name="curve1" name=TABLED
+	set tabled_id [hm_getvalue curves name="TABLED" dataname=id]
+
+	if {$standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed" || $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		*curveaddpoint $tabled_id 0 5 1
+		*curveaddpoint $tabled_id 1 2000 1
+	} elseif {$standard == "AECTP-400 EDD V1 - Wheeled Vehicles"} {
+		*curveaddpoint $tabled_id 0 5 1
+		*curveaddpoint $tabled_id 1 500 1
+	} elseif {$standard == "MIL-STD-810H"} {
+		*curveaddpoint $tabled_id 0 0 0
+		*curveaddpoint $tabled_id 1 0.0044 0
+		*curveaddpoint $tabled_id 2 0.0143 40
+		*curveaddpoint $tabled_id 3 0.0154 0
+		*curveaddpoint $tabled_id 4 0.0264 0
+	}
+}
+
+proc setTABRND {} {
+	global direction
+	global method
+	global standard
+
+	if {[hm_entityinfo exist curves "TABRND" -byname] == 1} {
+		*clearmark curves 1
+		*createmark curves 1 "TABRND"
+		*deletemark curves 1
+	}
+	
+	*createentity curves name="curve1"
+	*setvalue curves name="curve1" STATUS=1 12300=1
+	*setvalue curves name="curve1" STATUS=1 12301=12
+	*setvalue curves name="curve1" name=TABRND
+	*setvalue curves name="TABRND" STATUS=2 7923="LOG"
+	*setvalue curves name="TABRND" STATUS=2 7924="LOG"
+	set tabrnd_id [hm_getvalue curves name="TABRND" dataname=id]
+
+	if {$direction == "Vertical" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		*curveaddpoint $tabrnd_id 0 5 0.001
+		*curveaddpoint $tabrnd_id 1 20 0.015
+		*curveaddpoint $tabrnd_id 2 510 0.015
+		*curveaddpoint $tabrnd_id 3 2000 0.001
+	} elseif {$direction == "Lateral & Longitudinal" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		*curveaddpoint $tabrnd_id 0 5 0.001
+		*curveaddpoint $tabrnd_id 1 20 0.01
+		*curveaddpoint $tabrnd_id 2 510 0.01
+		*curveaddpoint $tabrnd_id 3 2000 0.001
+	} elseif {$direction == "Vertical" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed"} {
+		*curveaddpoint $tabrnd_id 0 5 0.0005
+		*curveaddpoint $tabrnd_id 1 20 0.0075
+		*curveaddpoint $tabrnd_id 2 510 0.0075
+		*curveaddpoint $tabrnd_id 3 2000 0.0005
+	} elseif {$direction == "Lateral & Longitudinal" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed"} {
+		*curveaddpoint $tabrnd_id 0 5 0.0005
+		*curveaddpoint $tabrnd_id 1 20 0.005
+		*curveaddpoint $tabrnd_id 2 510 0.005
+		*curveaddpoint $tabrnd_id 3 2000 0.0005
+	} elseif {$direction == "All Axes" && $method == "Material Transported in Wheeled Vehicles"} {
+		*curveaddpoint $tabrnd_id 0 5 0.001
+		*curveaddpoint $tabrnd_id 1 7 0.1
+		*curveaddpoint $tabrnd_id 2 11 0.1
+		*curveaddpoint $tabrnd_id 3 14 0.03
+		*curveaddpoint $tabrnd_id 4 50 0.03
+		*curveaddpoint $tabrnd_id 5 500 0.002
+	} elseif {$direction == "All Axes" && $method == "Two Wheeled Trailers - Combined Test Applicable to All Axes"} {
+		*curveaddpoint $tabrnd_id 0 5 0.2
+		*curveaddpoint $tabrnd_id 1 7 0.4
+		*curveaddpoint $tabrnd_id 2 8 0.4
+		*curveaddpoint $tabrnd_id 3 10 0.051
+		*curveaddpoint $tabrnd_id 4 20 0.04
+		*curveaddpoint $tabrnd_id 5 43 0.1
+		*curveaddpoint $tabrnd_id 6 50 0.031
+		*curveaddpoint $tabrnd_id 7 98 0.069
+		*curveaddpoint $tabrnd_id 8 100 0.08
+		*curveaddpoint $tabrnd_id 9 140 0.054
+		*curveaddpoint $tabrnd_id 10 143 0.034
+		*curveaddpoint $tabrnd_id 11 150 0.03
+		*curveaddpoint $tabrnd_id 12 259 0.046
+		*curveaddpoint $tabrnd_id 13 332 0.01
+		*curveaddpoint $tabrnd_id 14 500 0.005
+	} elseif {$direction == "Vertical" && $method == "Composite Wheeled Vehicles"} {
+		*curveaddpoint $tabrnd_id 0 5 0.128
+		*curveaddpoint $tabrnd_id 1 6 0.129
+		*curveaddpoint $tabrnd_id 2 7 0.3
+		*curveaddpoint $tabrnd_id 3 8 0.3
+		*curveaddpoint $tabrnd_id 4 9 0.1
+		*curveaddpoint $tabrnd_id 5 12 0.1
+		*curveaddpoint $tabrnd_id 6 14 0.15
+		*curveaddpoint $tabrnd_id 7 16 0.15
+		*curveaddpoint $tabrnd_id 8 19 0.04
+		*curveaddpoint $tabrnd_id 9 90 0.006
+		*curveaddpoint $tabrnd_id 10 125 0.004
+		*curveaddpoint $tabrnd_id 11 190 0.004
+		*curveaddpoint $tabrnd_id 12 211 0.006
+		*curveaddpoint $tabrnd_id 13 440 0.006
+		*curveaddpoint $tabrnd_id 14 500 0.002
+	} elseif {$direction == "Lateral" && $method == "Composite Wheeled Vehicles"} {
+		*curveaddpoint $tabrnd_id 0 5 0.041
+		*curveaddpoint $tabrnd_id 1 6 0.044
+		*curveaddpoint $tabrnd_id 2 7 0.11
+		*curveaddpoint $tabrnd_id 3 8 0.11
+		*curveaddpoint $tabrnd_id 4 9 0.043
+		*curveaddpoint $tabrnd_id 5 12 0.043
+		*curveaddpoint $tabrnd_id 6 14 0.074
+		*curveaddpoint $tabrnd_id 7 16 0.074
+		*curveaddpoint $tabrnd_id 8 19 0.02
+		*curveaddpoint $tabrnd_id 9 100 0.0007
+		*curveaddpoint $tabrnd_id 10 189 0.001
+		*curveaddpoint $tabrnd_id 11 350 0.004
+		*curveaddpoint $tabrnd_id 12 425 0.004
+		*curveaddpoint $tabrnd_id 13 482 0.002
+		*curveaddpoint $tabrnd_id 14 500 0.001
+	} elseif {$direction == "Longitudinal" && $method == "Composite Wheeled Vehicles"} {
+		*curveaddpoint $tabrnd_id 0 5 0.018
+		*curveaddpoint $tabrnd_id 1 6 0.024
+		*curveaddpoint $tabrnd_id 2 7 0.05
+		*curveaddpoint $tabrnd_id 3 8 0.05
+		*curveaddpoint $tabrnd_id 4 9 0.02
+		*curveaddpoint $tabrnd_id 5 12 0.02
+		*curveaddpoint $tabrnd_id 6 14 0.05
+		*curveaddpoint $tabrnd_id 7 16 0.05
+		*curveaddpoint $tabrnd_id 8 19 0.01
+		*curveaddpoint $tabrnd_id 9 23 0.01
+		*curveaddpoint $tabrnd_id 10 25 0.008
+		*curveaddpoint $tabrnd_id 11 66 0.001
+		*curveaddpoint $tabrnd_id 12 84 0.001
+		*curveaddpoint $tabrnd_id 13 90 0.002
+		*curveaddpoint $tabrnd_id 14 165 0.002
+		*curveaddpoint $tabrnd_id 15 221 0.003
+		*curveaddpoint $tabrnd_id 16 455 0.003
+		*curveaddpoint $tabrnd_id 17 500 0.002
+	} elseif {$direction == "Vertical" && $method == "Two Wheeled Trailers"} {
+		*curveaddpoint $tabrnd_id 0 5 0.2
+		*curveaddpoint $tabrnd_id 1 7 0.4
+		*curveaddpoint $tabrnd_id 2 8 0.4
+		*curveaddpoint $tabrnd_id 3 10 0.051
+		*curveaddpoint $tabrnd_id 4 20 0.04
+		*curveaddpoint $tabrnd_id 5 43 0.1
+		*curveaddpoint $tabrnd_id 6 50 0.031
+		*curveaddpoint $tabrnd_id 7 105 0.075
+		*curveaddpoint $tabrnd_id 8 150 0.03
+		*curveaddpoint $tabrnd_id 9 259 0.046
+		*curveaddpoint $tabrnd_id 10 332 0.01
+		*curveaddpoint $tabrnd_id 11 500 0.005
+	} elseif {$direction == "Lateral" && $method == "Two Wheeled Trailers"} {
+		*curveaddpoint $tabrnd_id 0 5 0.05
+		*curveaddpoint $tabrnd_id 1 7 0.065
+		*curveaddpoint $tabrnd_id 2 8 0.065
+		*curveaddpoint $tabrnd_id 3 11 0.022
+		*curveaddpoint $tabrnd_id 4 87 0.003
+		*curveaddpoint $tabrnd_id 5 475 0.001
+		*curveaddpoint $tabrnd_id 6 500 0.0005
+	} elseif {$direction == "Longitudinal" && $method == "Two Wheeled Trailers"} {
+		*curveaddpoint $tabrnd_id 0 5 0.054
+		*curveaddpoint $tabrnd_id 1 7 0.1
+		*curveaddpoint $tabrnd_id 2 8 0.1
+		*curveaddpoint $tabrnd_id 3 13 0.014
+		*curveaddpoint $tabrnd_id 4 21 0.038
+		*curveaddpoint $tabrnd_id 5 23 0.038
+		*curveaddpoint $tabrnd_id 6 25 0.017
+		*curveaddpoint $tabrnd_id 7 76 0.003
+		*curveaddpoint $tabrnd_id 8 100 0.08
+		*curveaddpoint $tabrnd_id 9 140 0.054
+		*curveaddpoint $tabrnd_id 10 155 0.006
+		*curveaddpoint $tabrnd_id 11 500 0.005
+	}
+}
+
+proc setTABRNDSwept {} {
+	global standard
+	global direction
+	global method
+	global userInputFirstMode
+	global userInputSecondMode
+	global userInputThirdMode
+
+
+	if {[hm_entityinfo exist curves "TABRND" -byname] == 1} {
+		*clearmark curves 1
+		*createmark curves 1 "TABRND"
+		*deletemark curves 1
+	}
+	
+	*createentity curves name="curve1"
+	*setvalue curves name="curve1" STATUS=1 12300=1
+	*setvalue curves name="curve1" STATUS=1 12301=12
+	*setvalue curves name="curve1" name=TABRND
+	*setvalue curves name="TABRND" STATUS=2 7923="LOG"
+	*setvalue curves name="TABRND" STATUS=2 7924="LOG"
+	set tabrnd_id [hm_getvalue curves name="TABRND" dataname=id]
+
+	if {$direction == "Vertical" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		if {$method == "Material Transported as Secured Cargo in Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] 510 0.015
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		} elseif {$method == "Material Installed in the Turret of Tracked Vehicles"} { 
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.2
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.2
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] 510 0.015
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		} elseif {$method == "Material Installed in the Hull of Heavy Tracked Vehicles"} { 
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.3
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] 510 0.015
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		} elseif {$method == "Material Installed in the Hull of Light Tracked Vehicles"} { 
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.015
+			*curveaddpoint $tabrnd_id [incr int] 510 0.015
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		}
+	} elseif {$direction == "Lateral & Longitudinal" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed"} {
+		if {$method == "Material Transported as Secured Cargo in Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] 510 0.01
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		} elseif {$method == "Material Installed in the Turret of Tracked Vehicles"} { 
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.05
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.05
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] 510 0.01
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		} elseif {$method == "Material Installed in the Hull of Heavy Tracked Vehicles"} { 
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] 510 0.01
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		} elseif {$method == "Material Installed in the Hull of Light Tracked Vehicles"} { 
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.001
+			*curveaddpoint $tabrnd_id [incr int] 20 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.25
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.25
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.01
+			*curveaddpoint $tabrnd_id [incr int] 510 0.01
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.001
+		}
+	} elseif {$direction == "Vertical" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed"} {
+		if {$method == "Material Transported as Secured Cargo in Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.0075
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.0075
+			} else {
+				set result [expr {0.00031*($userInputFirstMode**0.29248)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 510 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		} elseif {$method == "Material Installed in the Turret of Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.0075
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.0075
+			} else {
+				set result [expr {0.00031*($userInputFirstMode**0.29248)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.1
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.05
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.05
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 510 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		} elseif {$method == "Material Installed in the Hull of Heavy Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.0075
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.0075
+			} else {
+				set result [expr {0.00031*($userInputFirstMode**0.29248)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.15
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 510 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		} elseif {$method == "Material Installed in the Hull of Light Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.0075
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.0075
+			} else {
+				set result [expr {0.00031*($userInputFirstMode**0.29248)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.25
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.25
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 510 0.0075
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		} 
+	} elseif {$direction == "Lateral & Longitudinal" && $standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed"} {
+			if {$method == "Material Transported as Secured Cargo in Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.005
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.005
+			} else {
+				set result [expr {0.0000345*($userInputFirstMode**1.66096)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] 510 0.005
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		} elseif {$method == "Material Installed in the Turret of Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.005
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.005
+			} else {
+				set result [expr {0.0000345*($userInputFirstMode**1.66096)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.05
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.05
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.025
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.025
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] 510 0.005
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		} elseif {$method == "Material Installed in the Hull of Heavy Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.005
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.005
+			} else {
+				set result [expr {0.0000345*($userInputFirstMode**1.66096)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.075
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] 510 0.005
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		} elseif {$method == "Material Installed in the Hull of Light Tracked Vehicles"} {
+			set int 0
+			*curveaddpoint $tabrnd_id $int 5 0.0005
+			if {$userInputFirstMode > 22.50} {
+				*curveaddpoint $tabrnd_id [incr int] 20 0.005
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] 0.005
+			} else {
+				set result [expr {0.0000345*($userInputFirstMode**1.66096)}]
+				*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.5}] $result
+			}
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode-2.49}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.5
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputFirstMode+2.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode-4.99}] 0.25
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5}] 0.25
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputSecondMode+5.01}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.5}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode-7.49}] 0.125
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.5}] 0.125
+			*curveaddpoint $tabrnd_id [incr int] [expr {$userInputThirdMode+7.51}] 0.005
+			*curveaddpoint $tabrnd_id [incr int] 510 0.005
+			*curveaddpoint $tabrnd_id [incr int] 2000 0.0005
+		}
+	}
+}
+
+proc setRLOAD {typeexcite} {
+	if {[hm_entityinfo exist analysisparameters "RLOAD" -byname] == 1} {
+		*clearmark analysisparameters 1
+		*createmark analysisparameters 1 "RLOAD"
+		*deletemark analysisparameters 1
+	}
+
+	*createentity analysisparameters config=310 name="loadstepinput1"
+	*setvalue analysisparameters name="loadstepinput1" freqdependant_type=RLOAD2
+	*setvalue analysisparameters name="loadstepinput1" name=RLOAD
+	set spcd_id [hm_getvalue loadcols name="SPCD" dataname=id]
+	*setvalue analysisparameters name="RLOAD" STATUS=2 exciteid={loadcols $spcd_id}
+	set tabled_id [hm_getvalue curves name="TABLED" dataname=id]
+	*setvalue analysisparameters name="RLOAD" STATUS=2 tb_tableid={curves $tabled_id}
+	*setvalue analysisparameters name="RLOAD" STATUS=2 rd_rp_flag=1
+	*setvalue analysisparameters name="RLOAD" STATUS=1 dynamic_excitation_type= $typeexcite
+}
+
+proc setLoadStepFRF {} {
+	if {[hm_entityinfo exist loadsteps "FRF" -byname] == 1} {
+		*clearmark loadsteps 1
+		*createmark loadsteps 1 "FRF"
+		*deletemark loadsteps 1
+	}
+
+	*createentity loadsteps includeid=0 name="loadstep1"
+	*setvalue loadsteps name="loadstep1" name=FRF
+	*setvalue loadsteps name="FRF" STATUS=2 OS_TYPE=6
+	*setvalue loadsteps name="FRF" STATUS=1 4709=6
+	*setvalue loadsteps name="FRF" STATUS=2 4059=1
+	*setvalue loadsteps name="FRF" STATUS=2 4060=MFREQ
+	*setvalue loadsteps name="FRF" STATUS=2 9114=0
+	set spc_id [hm_getvalue loadcols name="SPC" dataname=id]
+	*setvalue loadsteps name="FRF" STATUS=2 OS_SPCID={loadcols $spc_id}
+	*setvalue loadsteps name="FRF" STATUS=2 4143=1
+	*setvalue loadsteps name="FRF" STATUS=1 4144=1
+	*setvalue loadsteps name="FRF" STATUS=1 4145={loadcols $spc_id}
+	set rload_id [hm_getvalue analysisparameters name="RLOAD" dataname=id]
+	*setvalue loadsteps name="FRF" STATUS=2 OS_DLOADID={analysisparameters $rload_id}
+	*setvalue loadsteps name="FRF" STATUS=2 4143=1
+	*setvalue loadsteps name="FRF" STATUS=1 4190=1
+	*setvalue loadsteps name="FRF" STATUS=1 4191={Analysisparameters $rload_id}
+	set eigrl_id [hm_getvalue analysisparameters name="EIGRL" dataname=id]
+	*setvalue loadsteps name="FRF" STATUS=2 OS_METHOD_STRUCTID={analysisparameters $eigrl_id}
+	*setvalue loadsteps name="FRF" STATUS=2 4143=1
+	*setvalue loadsteps name="FRF" STATUS=1 5415=1
+	*setvalue loadsteps name="FRF" STATUS=1 4966={Analysisparameters $eigrl_id}
+	set freq_id [hm_getvalue loadcols name="FREQ" dataname=id]
+	*setvalue loadsteps name="FRF" STATUS=2 OS_FREQID={loadcols $freq_id}
+	*setvalue loadsteps name="FRF" STATUS=2 4143=1
+	*setvalue loadsteps name="FRF" STATUS=1 4154=1
+	*setvalue loadsteps name="FRF" STATUS=1 4155={loadcols $freq_id}
+	set tabdmp_id [hm_getvalue curves name="TABDMP" dataname=id]
+	*setvalue loadsteps name="FRF" STATUS=2 OS_SDAMPING_STRUCTID={curves $tabdmp_id}
+	*setvalue loadsteps name="FRF" STATUS=2 4143=1
+	*setvalue loadsteps name="FRF" STATUS=1 4154=1
+	*setvalue loadsteps name="FRF" STATUS=1 4155={curves $tabdmp_id}
+}
+
+proc setRANDPS {} {
+	if {[hm_entityinfo exist loadcols "RANDPS" -byname] == 1} {
+		*clearmark loadcols 1
+		*createmark loadcols 1 "RANDPS"
+		*deletemark loadcols 1
+	}
+
+	*createentity loadcols cardimage=TSTEP name="loadcol1"
+	*setvalue loadcols name="loadcol1" name=RANDPS	
+	set frf_id [hm_getvalue loadsteps name="FRF" dataname=id]
+	*setvalue loadcols name="RANDPS" STATUS=2 7930={loadsteps $frf_id}
+	*setvalue loadcols name="RANDPS" STATUS=2 7931={loadsteps $frf_id}
+	*setvalue loadcols name="RANDPS" STATUS=2 7932=1
+	set tabled_id [hm_getvalue curves name="TABLED" dataname=id]
+	*setvalue loadcols name="RANDPS" STATUS=2 7934={curves $tabled_id}
+}
+
+proc setLoadStepPSD {} {
+	if {[hm_entityinfo exist loadsteps "PSD" -byname] == 1} {
+		*clearmark loadsteps 1
+		*createmark loadsteps 1 "PSD"
+		*deletemark loadsteps 1
+	}
+
+	*createentity loadsteps includeid=0 name="loadstep1"
+	*setvalue loadsteps name="loadstep1" name=PSD
+	*setvalue loadsteps name="PSD" STATUS=2 OS_TYPE=28
+	*setvalue loadsteps name="PSD" STATUS=1 4709=28
+	*setvalue loadsteps name="PSD" STATUS=2 4059=1
+	*setvalue loadsteps name="PSD" STATUS=2 4060=RANDOM
+	set randps_id [hm_getvalue loadcols name="RANDPS" dataname=id]
+	*setvalue loadsteps name="PSD" STATUS=2 OS_RANDOMID={loadcols $randps_id}
+	*setvalue loadsteps name="PSD" STATUS=2 4143=1
+	*setvalue loadsteps name="PSD" STATUS=1 9746=1
+	*setvalue loadsteps name="PSD" STATUS=1 10214=1
+	*setvalue loadsteps name="PSD" STATUS=1 9747={loadcols $randps_id}
+}
+
+proc setLoadStepShockDirect {} {
+	if {[hm_entityinfo exist loadsteps "Shock_Direct" -byname] == 1} {
+		*clearmark loadsteps 1
+		*createmark loadsteps 1 "Shock_Direct"
+		*deletemark loadsteps 1
+	}
+
+	*createentity loadsteps includeid=0 name="loadstep1"
+	*setvalue loadsteps name="loadstep1" name=Shock_Direct
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 OS_TYPE=7
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4709=7
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 4059=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 4060=DTRAN
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 4059=0
+	set spc_id [hm_getvalue loadcols name="SPC" dataname=id]
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 OS_SPCID={loadcols $spc_id}
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 4143=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4144=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4145={Loadcols $spc_id}
+	set tload_id [hm_getvalue analysisparameters name="TLOAD" dataname=id]
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 OS_DLOADID={analysisparameters $tload_id}
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 4143=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4190=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4191={Analysisparameters $tload_id}
+	set tstep_id [hm_getvalue loadcols name="TSTEP" dataname=id]
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 OS_TSTEP_D_ID={loadcols $tstep_id}
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 4143=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4192=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4726=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4193={Loadcols $tstep_id}	
+}
+
+proc setOutputs {} {
+	global standard
+	global userInputDamping
+	global userInputFirstMode
+
+	if {[hm_entityinfo exist cards "PARAM" -byname] == 1} {
+		*clearmark cards 1
+		*createmark cards 1 "PARAM"
+		*deletemark cards 1
+	}	
+
+	if {[hm_entityinfo exist cards "GLOBAL_OUTPUT_REQUEST" -byname] == 1} {
+		*clearmark cards 1
+		*createmark cards 1 "GLOBAL_OUTPUT_REQUEST"
+		*deletemark cards 1
+	}
+
+	if {$standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed" || $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed" || $standard == "AECTP-400 EDD V1 - Wheeled Vehicles"} {
+		*cardcreate "PARAM"
+		*setvalue cards name="PARAM" STATUS=2 3811=1
+		*setvalue cards name="PARAM" STATUS=2 3812="NO"
+		*setvalue cards name="PARAM" STATUS=2 8384=1
+		*setvalue cards name="PARAM" STATUS=2 8385="REL"
+		*cardcreate "GLOBAL_OUTPUT_REQUEST"
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 2938=1
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 2939={ALL}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 4315={H3D}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 2174={RMS}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 2431=1
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 2432={YES}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 4325={H3D}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 1221={RMS}
+	} elseif {$standard == "MIL-STD-810H"} {
+		*cardcreate "PARAM"
+		*setvalue cards name="PARAM" STATUS=2 3811=1
+		*setvalue cards name="PARAM" STATUS=2 3812="NO"
+		*setvalue cards name="PARAM" STATUS=2 4009=1
+		*setvalue cards name="PARAM" STATUS=2 4010=$userInputDamping
+		*setvalue cards name="PARAM" STATUS=2 422=1
+		*setvalue cards name="PARAM" STATUS=2 423=[expr {2*3.14159*$userInputFirstMode}]
+		*cardcreate "GLOBAL_OUTPUT_REQUEST"
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 2938=1
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 2939={ALL}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 4315={H3D}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 2431=1
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 2432={YES}
+		*setvalue cards name="GLOBAL_OUTPUT_REQUEST" STATUS=2 ROW=0 4325={H3D}
+	}
+}
+
+proc createCards {widget} {
+	global standard
+	global method
+	global type
+	global direction
+
+	if {($standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed" || $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed") && $type == "Broadband Random"} {
+		setFREQ 5 1 1995
+		setEIGRL 4000
+		setTABDMP 4000
+		setTABLED
+		setTABRND
+		setRLOAD ACCE
+		setLoadStepFRF
+		setRANDPS
+		setLoadStepPSD
+		setOutputs
+	} elseif {($standard == "AECTP-400 EDD V1 - Tracked Vehicles Low Speed" || $standard == "AECTP-400 EDD V1 - Tracked Vehicles High Speed") && $type == "Harmonic Swept Narrowbands"} {
+		toplevel .temp_window
+		set temp .temp_window
+
+		wm title $temp "User Inputs"
+		wm geometry $temp 350x130+10+10
+
+		set page2 [frame $temp.page2]
+		place $page2 -in $temp -relx 0 -rely 0 -relwidth 1 -relheight 1
+
+		hwtk::frame $page2.f1
+		pack configure $page2.f1 -padx 5 -pady 5 -anchor w
+
+		hwtk::label $page2.f1.title_label -text "1.Dogal Frekans:" -help "AECTP-400 Low Speed Frekans Limitleri: 20 - 70 Hz \nAECTP-400 High Speed Frekans Limitleri: 70 - 170 Hz"
+		pack $page2.f1.title_label -side left
+
+		hwtk::entry $page2.f1.entry_box -textvariable userInputFirstMode
+		pack $page2.f1.entry_box -side right
+
+		hwtk::frame $page2.f2
+		pack configure $page2.f2 -padx 5 -pady 5 -anchor w
+
+		hwtk::label $page2.f2.title_label -text "2.Dogal Frekans:" -help "AECTP-400 Low Speed Frekans Limitleri: 40 - 140 Hz \nAECTP-400 High Speed Frekans Limitleri: 140 - 340 Hz"
+		pack $page2.f2.title_label -side left
+
+		hwtk::entry $page2.f2.entry_box -textvariable userInputSecondMode
+		pack $page2.f2.entry_box -side right
+
+		hwtk::frame $page2.f3
+		pack configure $page2.f3 -padx 5 -pady 5 -anchor w
+
+		hwtk::label $page2.f3.title_label -text "3.Dogal Frekans:" -help "AECTP-400 Low Speed Frekans Limitleri: 60 - 210 Hz \nAECTP-400 High Speed Frekans Limitleri: 210 - 510 Hz"
+		pack $page2.f3.title_label -side left
+
+		hwtk::entry $page2.f3.entry_box -textvariable userInputThirdMode
+		pack $page2.f3.entry_box -side right
+
+		set tooltipText "Lutfen, dogal frekans degerleri icin standattaki araliklara uydugunuzu kontrol edin!!!"
+
+		frame $page2.f4
+		pack configure $page2.f4 -padx 5 -pady 5 -anchor s
+		pack [hwtk::button $page2.f4.b -text "Devam Et!" -width 55 -image organize-24.png -compound left -command "setCards $page2.f4.b"] -side bottom -fill both
+		
+		proc setCards {widget} {
+			setFREQ 5 1 1995
+			setEIGRL 4000
+			setTABDMP 4000
+			setTABLED
+			setTABRNDSwept
+			setRLOAD ACCE
+			setLoadStepFRF
+			setRANDPS
+			setLoadStepPSD
+			setOutputs
+		}
+	} elseif {$standard == "AECTP-400 EDD V1 - Wheeled Vehicles"} {
+		setFREQ 5 1 495
+		setEIGRL 1000
+		setTABDMP 1000
+		setTABLED
+		setTABRND
+		setRLOAD ACCE
+		setLoadStepFRF
+		setRANDPS
+		setLoadStepPSD
+		setOutputs
+	} elseif {$standard == "MIL-STD-810H" && $method == "Procedure I - Functional Shock"} {
+		toplevel .temp_window
+		set temp .temp_window
+
+		wm title $temp "User Inputs"
+		wm geometry $temp 350x110+10+10
+
+		set page2 [frame $temp.page2]
+		place $page2 -in $temp -relx 0 -rely 0 -relwidth 1 -relheight 1
+
+		hwtk::frame $page2.f1
+		pack configure $page2.f1 -padx 5 -pady 5 -anchor w
+
+		hwtk::label $page2.f1.title_label -text "Yapisal Sonum Oranı:" -help "Ornek %5 Sonum Icin: 0.05"
+		pack $page2.f1.title_label -side left
+
+		hwtk::entry $page2.f1.entry_box -textvariable userInputDamping
+		pack $page2.f1.entry_box -side right
+
+		hwtk::frame $page2.f2
+		pack configure $page2.f2 -padx 5 -pady 5 -anchor w
+
+		hwtk::label $page2.f2.title_label -text "1.Dogal Frekans:" -help "Ornek (Hz): 20"
+		pack $page2.f2.title_label -side left
+
+		hwtk::entry $page2.f2.entry_box -textvariable userInputFirstMode
+		pack $page2.f2.entry_box -side right
+
+		frame $page2.f4
+		pack configure $page2.f4 -padx 5 -pady 5 -anchor s
+		pack [hwtk::button $page2.f4.b -text "Devam Et!" -width 55 -image organize-24.png -compound left -command "setCards $page2.f4.b"] -side bottom -fill both
+		
+		proc setCards {widget} {
+			setTABLED
+			setTSTEP
+			setTLOAD
+			setLoadStepShockDirect
+			setOutputs
+		}		
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
