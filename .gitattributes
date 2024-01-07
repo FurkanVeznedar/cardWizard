@@ -1,4 +1,3 @@
-# Auto detect text files and perform LF normalization
 ##################################################
 # File       : CreateCards
 # Date       : December 04, 2023
@@ -92,11 +91,11 @@ set PSD_Types_Wheeled {
 }
 
 set PSD_Directions {
-	"Vertical" "Lateral & Longitudial"
+	"Vertical" "Lateral & Longitudinal"
 }
 
 set PSD_Directions_Wheeled {
-	"Vertical" "Lateral" "Longitudial"
+	"Vertical" "Lateral" "Longitudinal"
 }
 
 set PSD_Directions_Wheeled_All {
@@ -117,7 +116,7 @@ place $page1 -in $main -relx 0 -rely 0 -relwidth 1 -relheight 1
 
 frame $page1.f1
 pack configure $page1.f1 -padx 5 -pady 5 -anchor s
-pack [hwtk::button $page1.f1.b1 -text "Zirhli Araclar Titresim: Hazir Kartlar" -help "Created By Furkan VEZNEDAR" -width 55 -image productHWTK-24.png -compound left] -side top -fill both
+pack [hwtk::button $page1.f1.b1 -text "Armored Vehicles Vibration: Card Wizard" -help "Created By Furkan VEZNEDAR" -width 55 -image productHWTK-24.png -compound left] -side top -fill both
 
 #Force user to select standard to continue####################################################
 
@@ -127,7 +126,7 @@ hwtk::checkbutton $lf2.b -text "Standard" -variable activated1 \
 $lf2 configure -labelwidget $lf2.b
 pack $lf2 -pady 2m -padx 2m
 
-hwtk::label $lf2.b1 -text "Standard Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::label $lf2.b1 -text "Choose Standard" -width 10 -image distanceManip.png -compound left -state disabled
 hwtk::combobox $lf2.b2 -textvariable standard -state disabled -values $Standard_Input -width 55
 pack $lf2.b1 $lf2.b2 -side top -fill x -pady 2
 
@@ -139,7 +138,7 @@ hwtk::checkbutton $lf3.b -text "Method" -variable activated2 \
 $lf3 configure -labelwidget $lf3.b
 pack $lf3 -pady 2m -padx 2m
 
-hwtk::label $lf3.b3 -text "Devam Wdilecek Methodu Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::label $lf3.b3 -text "Choose Method" -width 10 -image distanceManip.png -compound left -state disabled
 hwtk::combobox $lf3.b4 -textvariable method -state disabled -postcommand "updateMethodCombobox $lf3.b4" -width 55
 pack $lf3.b3 $lf3.b4 -side top -fill x -pady 2
 
@@ -161,16 +160,16 @@ proc updateMethodCombobox {widget} {
 }
 
 set lf4 [hwtk::labelframe $page1.f4]
-hwtk::checkbutton $lf4.b -text "PSD Tahrik Egrisi AECTP-400" -variable activated3 \
-	-command "::selectType $lf4" -help "Eger Standard Olarak MIL-STD-810H Secildiyse Bu Alani Elleme"
+hwtk::checkbutton $lf4.b -text "PSD Excitation Curve AECTP-400" -variable activated3 \
+	-command "::selectType $lf4" -help "If MIL-STD-810H is chosen as standard, do not adjust here"
 $lf4 configure -labelwidget $lf4.b
 pack $lf4 -pady 2m -padx 2m
 
-hwtk::label $lf4.b1 -text "PSD Tahrik Tipini Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::label $lf4.b1 -text "Choose Type of the PSD" -width 10 -image distanceManip.png -compound left -state disabled
 hwtk::combobox $lf4.b2 -textvariable type -state disabled -width 55 -postcommand "updatePSDTypes $lf4.b2"
 pack $lf4.b1 $lf4.b2 -side top -fill x -pady 2
 
-hwtk::label $lf4.b3 -text "PSD Tahrik Yonunu Sec" -width 10 -image distanceManip.png -compound left -state disabled
+hwtk::label $lf4.b3 -text "Choose Direction of the PSD" -width 10 -image distanceManip.png -compound left -state disabled
 hwtk::combobox $lf4.b4 -textvariable direction -state disabled -width 55 -postcommand "updatePSDDirections $lf4.b4"
 pack $lf4.b3 $lf4.b4 -side top -fill x -pady 2
 
@@ -208,7 +207,7 @@ proc updatePSDDirections {widget} {
 
 frame $page1.f5
 pack configure $page1.f5 -padx 5 -pady 5 -anchor s
-pack [hwtk::button $page1.f5.b -text "Kartalari Olustur" -width 55 -image folderView-24.png -compound left -command "createCards $page1.f5.b"] -side bottom -fill both
+pack [hwtk::button $page1.f5.b -text "Create Cards" -width 55 -image folderView-24.png -compound left -command "createCards $page1.f5.b"] -side bottom -fill both
 
 proc setFREQ {f1 df fl} {
 	if {[hm_entityinfo exist loadcols "FREQ" -byname] == 1} {
@@ -948,10 +947,10 @@ proc setLoadStepShockDirect {} {
 	*setvalue loadsteps name="Shock_Direct" STATUS=1 4190=1
 	*setvalue loadsteps name="Shock_Direct" STATUS=1 4191={Analysisparameters $tload_id}
 	set tstep_id [hm_getvalue loadcols name="TSTEP" dataname=id]
-	*setvalue loadsteps name="Shock_Direct" STATUS=2 OS_TSTEP_D_ID={loadcols $tstep_id}
+	*setvalue loadsteps name="Shock_Direct" STATUS=2 OS_TSTEPID={loadcols $tstep_id}
 	*setvalue loadsteps name="Shock_Direct" STATUS=2 4143=1
 	*setvalue loadsteps name="Shock_Direct" STATUS=1 4192=1
-	*setvalue loadsteps name="Shock_Direct" STATUS=1 4726=1
+	*setvalue loadsteps name="Shock_Direct" STATUS=1 4726=0
 	*setvalue loadsteps name="Shock_Direct" STATUS=1 4193={Loadcols $tstep_id}	
 }
 
@@ -1035,7 +1034,7 @@ proc createCards {widget} {
 		hwtk::frame $page2.f1
 		pack configure $page2.f1 -padx 5 -pady 5 -anchor w
 
-		hwtk::label $page2.f1.title_label -text "1.Dogal Frekans:" -help "AECTP-400 Low Speed Frekans Limitleri: 20 - 70 Hz \nAECTP-400 High Speed Frekans Limitleri: 70 - 170 Hz"
+		hwtk::label $page2.f1.title_label -text "First Natural Frequency:" -help "AECTP-400 Low Speed Frequency Limits: 20 - 70 Hz \nAECTP-400 High Speed Frequency Limits: 70 - 170 Hz"
 		pack $page2.f1.title_label -side left
 
 		hwtk::entry $page2.f1.entry_box -textvariable userInputFirstMode
@@ -1044,7 +1043,7 @@ proc createCards {widget} {
 		hwtk::frame $page2.f2
 		pack configure $page2.f2 -padx 5 -pady 5 -anchor w
 
-		hwtk::label $page2.f2.title_label -text "2.Dogal Frekans:" -help "AECTP-400 Low Speed Frekans Limitleri: 40 - 140 Hz \nAECTP-400 High Speed Frekans Limitleri: 140 - 340 Hz"
+		hwtk::label $page2.f2.title_label -text "Second Natural Frequency:" -help "AECTP-400 Low Speed Frequency Limits: 40 - 140 Hz \nAECTP-400 High Speed FFrequency Limits: 140 - 340 Hz"
 		pack $page2.f2.title_label -side left
 
 		hwtk::entry $page2.f2.entry_box -textvariable userInputSecondMode
@@ -1053,17 +1052,17 @@ proc createCards {widget} {
 		hwtk::frame $page2.f3
 		pack configure $page2.f3 -padx 5 -pady 5 -anchor w
 
-		hwtk::label $page2.f3.title_label -text "3.Dogal Frekans:" -help "AECTP-400 Low Speed Frekans Limitleri: 60 - 210 Hz \nAECTP-400 High Speed Frekans Limitleri: 210 - 510 Hz"
+		hwtk::label $page2.f3.title_label -text "Third Natural Frequency:" -help "AECTP-400 Low Speed Frequency Limits: 60 - 210 Hz \nAECTP-400 High Speed Frequency Limits: 210 - 510 Hz"
 		pack $page2.f3.title_label -side left
 
 		hwtk::entry $page2.f3.entry_box -textvariable userInputThirdMode
 		pack $page2.f3.entry_box -side right
 
-		set tooltipText "Lutfen, dogal frekans degerleri icin standattaki araliklara uydugunuzu kontrol edin!!!"
+		set tooltipText "Please, check the standard requirements for natural frequency limits!!!"
 
 		frame $page2.f4
 		pack configure $page2.f4 -padx 5 -pady 5 -anchor s
-		pack [hwtk::button $page2.f4.b -text "Devam Et!" -width 55 -image organize-24.png -compound left -command "setCards $page2.f4.b"] -side bottom -fill both
+		pack [hwtk::button $page2.f4.b -text "Continue!" -width 55 -image organize-24.png -help $tooltipText -compound left -command "setCards $page2.f4.b"] -side bottom -fill both
 		
 		proc setCards {widget} {
 			setFREQ 5 1 1995
@@ -1101,7 +1100,7 @@ proc createCards {widget} {
 		hwtk::frame $page2.f1
 		pack configure $page2.f1 -padx 5 -pady 5 -anchor w
 
-		hwtk::label $page2.f1.title_label -text "Yapisal Sonum Oranı:" -help "Ornek %5 Sonum Icin: 0.05"
+		hwtk::label $page2.f1.title_label -text "Structural Damping:" -help "Example For 5% Damping: 0.05"
 		pack $page2.f1.title_label -side left
 
 		hwtk::entry $page2.f1.entry_box -textvariable userInputDamping
@@ -1110,7 +1109,7 @@ proc createCards {widget} {
 		hwtk::frame $page2.f2
 		pack configure $page2.f2 -padx 5 -pady 5 -anchor w
 
-		hwtk::label $page2.f2.title_label -text "1.Dogal Frekans:" -help "Ornek (Hz): 20"
+		hwtk::label $page2.f2.title_label -text "First Natural Frequency:" -help "Example (Hz): 20"
 		pack $page2.f2.title_label -side left
 
 		hwtk::entry $page2.f2.entry_box -textvariable userInputFirstMode
@@ -1118,7 +1117,7 @@ proc createCards {widget} {
 
 		frame $page2.f4
 		pack configure $page2.f4 -padx 5 -pady 5 -anchor s
-		pack [hwtk::button $page2.f4.b -text "Devam Et!" -width 55 -image organize-24.png -compound left -command "setCards $page2.f4.b"] -side bottom -fill both
+		pack [hwtk::button $page2.f4.b -text "Continue!" -width 55 -image organize-24.png -compound left -command "setCards $page2.f4.b"] -side bottom -fill both
 		
 		proc setCards {widget} {
 			setTABLED
@@ -1129,7 +1128,6 @@ proc createCards {widget} {
 		}		
 	}
 }
-
 
 
 
