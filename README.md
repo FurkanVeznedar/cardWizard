@@ -1,1 +1,5 @@
 ![First](https://github.com/FurkanVeznedar/cardWizard/assets/136994961/ee139cbe-bdb3-4fef-b64d-a5537c49e8c2)
+![Second](https://github.com/FurkanVeznedar/cardWizard/assets/136994961/6f1a0919-d40b-466f-b4e4-a87645955f00)
+![Third](https://github.com/FurkanVeznedar/cardWizard/assets/136994961/ef45b9cc-9bd1-42fb-976f-bca4f268eeb2)
+![Fourth](https://github.com/FurkanVeznedar/cardWizard/assets/136994961/4a9bda85-c260-4add-b3f3-70c5198d654a)
+![Fifth](https://github.com/FurkanVeznedar/cardWizard/assets/136994961/ba524bf4-3bcb-48af-8d0c-194be13a62b6)
